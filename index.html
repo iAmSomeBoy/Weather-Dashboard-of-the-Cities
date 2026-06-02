@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
-    <title>Weather Dashboard</title>
+    <title>Weather Dashboard | Complete Weather App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <header class="site-header">
-        <h1>Weather Dashboard</h1>
+        <h1><i class="fas fa-cloud-sun"></i> Weather Dashboard</h1>
     </header>
 
     <div class="layout">
@@ -23,12 +18,14 @@
         <aside class="sidebar">
             <h5 class="sidebar-label">Search for a City</h5>
             <div class="search-group">
-                <input id="enter-city" type="text" class="search-input" placeholder="Enter a city">
+                <input id="enter-city" type="text" class="search-input" placeholder="Enter city name (e.g., London, Dhaka)">
                 <button class="search-btn" type="button" id="search-button">
                     <i class="fas fa-search"></i>
                 </button>
             </div>
-            <button class="clear-btn" type="button" id="clear-history">Clear History</button>
+            <button class="clear-btn" type="button" id="clear-history">
+                <i class="fas fa-trash-alt"></i> Clear History
+            </button>
             <div id="history" class="history-list"></div>
         </aside>
 
@@ -36,20 +33,82 @@
         <main class="main-content">
             <!-- Today's weather card -->
             <div class="today-card hidden" id="today-weather">
-                <h3 id="city-name" class="city-name"></h3>
-                <img id="current-pic" alt="" class="weather-icon">
+                <div class="weather-header">
+                    <h2 id="city-name" class="city-name"></h2>
+                    <div class="weather-icon-container">
+                        <img id="current-pic" alt="Weather icon" class="weather-icon">
+                        <span id="weather-description" class="weather-desc"></span>
+                    </div>
+                </div>
+                
                 <div class="stats-grid">
-                    <p id="temperature" class="stat"></p>
-                    <p id="humidity" class="stat"></p>
-                    <p id="wind-speed" class="stat"></p>
-                    <p id="UV-index" class="stat"></p>
+                    <div class="stat-card">
+                        <i class="fas fa-thermometer-half"></i>
+                        <p id="temperature" class="stat"></p>
+                        <span class="stat-label">Temperature</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-temperature-low"></i>
+                        <p id="feels-like" class="stat"></p>
+                        <span class="stat-label">Feels Like</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-tint"></i>
+                        <p id="humidity" class="stat"></p>
+                        <span class="stat-label">Humidity</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-wind"></i>
+                        <p id="wind-speed" class="stat"></p>
+                        <span class="stat-label">Wind Speed</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-compass"></i>
+                        <p id="wind-direction" class="stat"></p>
+                        <span class="stat-label">Wind Direction</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-eye"></i>
+                        <p id="visibility" class="stat"></p>
+                        <span class="stat-label">Visibility</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-arrow-down"></i>
+                        <p id="pressure" class="stat"></p>
+                        <span class="stat-label">Pressure</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-water"></i>
+                        <p id="dew-point" class="stat"></p>
+                        <span class="stat-label">Dew Point</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-sun"></i>
+                        <p id="UV-index" class="stat"></p>
+                        <span class="stat-label">UV Index</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-cloud-rain"></i>
+                        <p id="cloudiness" class="stat"></p>
+                        <span class="stat-label">Cloudiness</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-sunrise"></i>
+                        <p id="sunrise" class="stat"></p>
+                        <span class="stat-label">Sunrise</span>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-sunset"></i>
+                        <p id="sunset" class="stat"></p>
+                        <span class="stat-label">Sunset</span>
+                    </div>
                 </div>
             </div>
 
             <!-- 5-day forecast -->
             <div id="fiveday-header" class="forecast-section hidden">
-                <h3 class="forecast-title">5-Day Forecast</h3>
-                <div class="forecast-grid">
+                <h3 class="forecast-title"><i class="fas fa-calendar-week"></i> 5-Day Forecast</h3>
+                <div class="forecast-grid" id="forecast-container">
                     <div class="forecast"></div>
                     <div class="forecast"></div>
                     <div class="forecast"></div>
@@ -57,11 +116,21 @@
                     <div class="forecast"></div>
                 </div>
             </div>
+
+            <!-- Loading indicator -->
+            <div id="loading" class="loading hidden">
+                <i class="fas fa-spinner fa-spin"></i> Loading weather data...
+            </div>
+
+            <!-- Error message -->
+            <div id="error-message" class="error-message hidden">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <span id="error-text"></span>
+            </div>
         </main>
     </div>
 
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="./script.js"></script>
+    <script src="script.js"></script>
 </body>
-
 </html>
