@@ -82,6 +82,24 @@ function initPage() {
         });
     }
 
+    function setUvBadge(uvValue) {
+        const uvBadge = document.createElement("span");
+        uvBadge.setAttribute("class", "badge");
+        const roundedUv = Number(uvValue).toFixed(1);
+
+        if (uvValue < 3) {
+            uvBadge.classList.add("badge-success");
+        } else if (uvValue < 6) {
+            uvBadge.classList.add("badge-warning");
+        } else {
+            uvBadge.classList.add("badge-danger");
+        }
+
+        uvBadge.innerHTML = roundedUv;
+        currentUVEl.innerHTML = "";
+        currentUVEl.appendChild(uvBadge);
+    }
+
     // Get weather icon URL with fallback
     function getWeatherIconUrl(iconCode) {
         if (iconCode) {
@@ -108,7 +126,6 @@ function initPage() {
                 todayweatherEl.classList.remove("hidden");
 
                 // Format date
-                const currentDate = new Date(response.data.dt * 1000);
                 nameEl.textContent = response.data.name;
                 currentDateEl.textContent = formatDisplayDate(response.data.dt);
 
@@ -168,25 +185,25 @@ function initPage() {
                 let lat = response.data.coord.lat;
                 let lon = response.data.coord.lon;
                 
-                // Using One Call API for UV and additional data (deprecated but still works)
-                let oneCallURL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,alerts&appid=${APIKey}&units=imperial`;
+                // Using One Call API for UV and additional arguments
+                let oneCallURL = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,alerts&appid=${APIKey}&units=metric`;
                 
                 axios.get(oneCallURL).then(function(oneCallResponse) {
-                    const uvValue = oneCallResponse.data.current.uvi;
-                    const UVIndex = document.createElement("span");
-                    UVIndex.setAttribute("class", "badge");
-                    
-                    if (uvValue < 4) {
-                        UVIndex.classList.add("badge-success");
-                    } else if (uvValue < 8) {
-                        UVIndex.classList.add("badge-warning");
-                    } else {
-                        UVIndex.classList.add("badge-danger");
+                    const current = oneCallResponse.data.current;
+
+                    // API-backed enriched arguments
+                    if (typeof current.uvi === "number") {
+                        setUvBadge(current.uvi);
                     }
-                    
-                    UVIndex.innerHTML = uvValue;
-                    currentUVEl.innerHTML = "";
-                    currentUVEl.appendChild(UVIndex);
+                    if (typeof current.dew_point === "number") {
+                        dewPointEl.innerHTML = `${Math.round(current.dew_point)}°C`;
+                    }
+                    if (typeof current.feels_like === "number") {
+                        feelsLikeEl.innerHTML = `${Math.round(current.feels_like)}°C`;
+                    }
+                    if (typeof current.clouds === "number") {
+                        cloudinessEl.innerHTML = `${current.clouds}%`;
+                    }
                 }).catch(function() {
                     // Fallback if One Call API fails
                     currentUVEl.innerHTML = "N/A";

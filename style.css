@@ -295,7 +295,7 @@ body {
 }
 
 .extra-stat {
-    display: none;
+    display: block;
 }
 
 .stat small {
