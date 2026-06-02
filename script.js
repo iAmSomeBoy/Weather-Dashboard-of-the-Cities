@@ -21,6 +21,11 @@ function initPage() {
     const cloudinessEl = document.getElementById("cloudiness");
     const sunriseEl = document.getElementById("sunrise");
     const sunsetEl = document.getElementById("sunset");
+    const sunriseMetaEl = document.getElementById("sunrise-meta");
+    const sunsetMetaEl = document.getElementById("sunset-meta");
+    const currentDateEl = document.getElementById("current-date");
+    const hourlyPreviewEl = document.getElementById("hourly-preview-body");
+    const forecastTabsEl = document.getElementById("forecast-tabs");
     const loadingEl = document.getElementById("loading");
     const errorMessageEl = document.getElementById("error-message");
     const errorTextEl = document.getElementById("error-text");
@@ -69,6 +74,14 @@ function initPage() {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    function formatDisplayDate(timestamp) {
+        return new Date(timestamp * 1000).toLocaleDateString([], {
+            weekday: "long",
+            day: "numeric",
+            month: "short"
+        });
+    }
+
     // Get weather icon URL with fallback
     function getWeatherIconUrl(iconCode) {
         if (iconCode) {
@@ -96,10 +109,8 @@ function initPage() {
 
                 // Format date
                 const currentDate = new Date(response.data.dt * 1000);
-                const day = currentDate.getDate();
-                const month = currentDate.getMonth() + 1;
-                const year = currentDate.getFullYear();
-                nameEl.innerHTML = `${response.data.name} (${month}/${day}/${year})`;
+                nameEl.textContent = response.data.name;
+                currentDateEl.textContent = formatDisplayDate(response.data.dt);
 
                 // Weather icon and description
                 let weatherPic = response.data.weather[0]?.icon;
@@ -108,27 +119,21 @@ function initPage() {
                 descriptionEl.innerHTML = response.data.weather[0]?.description || "No description";
                 
                 // Get current weather icon ID for potential custom mapping
-                const weatherId = response.data.weather[0]?.id;
-                console.log("Weather condition ID:", weatherId); // For debugging - can map to custom icons
-
                 // Temperature data
                 const tempF = k2f(response.data.main.temp);
                 const tempC = k2c(response.data.main.temp);
-                const feelsLikeF = k2f(response.data.main.feels_like);
                 const feelsLikeC = k2c(response.data.main.feels_like);
-                const minTempF = k2f(response.data.main.temp_min);
-                const maxTempF = k2f(response.data.main.temp_max);
                 
-                currentTempEl.innerHTML = `${tempF}°F / ${tempC}°C<br><small>↓${minTempF}° ↑${maxTempF}°</small>`;
-                feelsLikeEl.innerHTML = `${feelsLikeF}°F / ${feelsLikeC}°C`;
+                currentTempEl.innerHTML = `${tempC}°C <small>(${tempF}°F)</small><br><small>↓${k2c(response.data.main.temp_min)}° ↑${k2c(response.data.main.temp_max)}°</small>`;
+                feelsLikeEl.innerHTML = `${feelsLikeC}°C`;
                 
                 // Humidity
                 currentHumidityEl.innerHTML = response.data.main.humidity + "%";
                 
                 // Wind speed and direction
                 const windSpeedMs = response.data.wind.speed;
-                const windSpeedMph = (windSpeedMs * 2.237).toFixed(2);
-                currentWindEl.innerHTML = `${windSpeedMph} MPH (${windSpeedMs} m/s)`;
+                const windSpeedKmh = (windSpeedMs * 3.6).toFixed(1);
+                currentWindEl.innerHTML = `${windSpeedKmh} km/h`;
                 
                 const windDeg = response.data.wind.deg || 0;
                 windDirectionEl.innerHTML = `${getWindDirection(windDeg)} (${windDeg}°)`;
@@ -136,7 +141,7 @@ function initPage() {
                 // Visibility (meters to km)
                 const visibilityM = response.data.visibility || 10000;
                 const visibilityKm = (visibilityM / 1000).toFixed(1);
-                visibilityEl.innerHTML = `${visibilityKm} km (${visibilityM} m)`;
+                visibilityEl.innerHTML = `${visibilityKm} km`;
                 
                 // Pressure
                 pressureEl.innerHTML = `${response.data.main.pressure} hPa`;
@@ -146,15 +151,18 @@ function initPage() {
                 cloudinessEl.innerHTML = `${clouds}%`;
                 
                 // Sunrise/Sunset
-                sunriseEl.innerHTML = formatTime(response.data.sys.sunrise);
-                sunsetEl.innerHTML = formatTime(response.data.sys.sunset);
+                const sunriseText = formatTime(response.data.sys.sunrise);
+                const sunsetText = formatTime(response.data.sys.sunset);
+                sunriseEl.innerHTML = sunriseText;
+                sunsetEl.innerHTML = sunsetText;
+                if (sunriseMetaEl) sunriseMetaEl.innerHTML = sunriseText;
+                if (sunsetMetaEl) sunsetMetaEl.innerHTML = sunsetText;
                 
                 // Calculate dew point (using formula)
                 const tempCForDew = k2c(response.data.main.temp);
                 const humidityForDew = response.data.main.humidity;
                 const dewPointC = tempCForDew - ((100 - humidityForDew) / 5);
-                const dewPointF = Math.floor((dewPointC * 9/5) + 32);
-                dewPointEl.innerHTML = `${dewPointC}°C / ${dewPointF}°F`;
+                dewPointEl.innerHTML = `${dewPointC}°C`;
 
                 // UV Index (from One Call API - more accurate)
                 let lat = response.data.coord.lat;
@@ -202,6 +210,44 @@ function initPage() {
                             dailyForecasts.push(list[i]);
                         }
                     }
+
+                    if (forecastTabsEl) {
+                        forecastTabsEl.innerHTML = "";
+                        const allTab = document.createElement("button");
+                        allTab.className = "forecast-tab is-active";
+                        allTab.type = "button";
+                        allTab.textContent = "All Days";
+                        forecastTabsEl.appendChild(allTab);
+
+                        dailyForecasts.forEach((item) => {
+                            const tab = document.createElement("button");
+                            tab.className = "forecast-tab";
+                            tab.type = "button";
+                            tab.textContent = new Date(item.dt * 1000).toLocaleDateString([], {
+                                day: "numeric",
+                                month: "short",
+                                weekday: "short"
+                            });
+                            forecastTabsEl.appendChild(tab);
+                        });
+                    }
+
+                    // Fill compact hourly preview panel
+                    if (hourlyPreviewEl) {
+                        hourlyPreviewEl.innerHTML = "";
+                        const hourlyItems = list.slice(0, 5);
+                        hourlyItems.forEach((item) => {
+                            const timeLabel = new Date(item.dt * 1000).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit"
+                            });
+                            const row = document.createElement("div");
+                            const tempC = ((item.main.temp - 32) * 5 / 9).toFixed(1);
+                            row.className = "hourly-item";
+                            row.innerHTML = `<span>${timeLabel}</span><span>${tempC}°C</span>`;
+                            hourlyPreviewEl.appendChild(row);
+                        });
+                    }
                     
                     // Update each forecast card
                     for (let i = 0; i < forecastDivs.length && i < dailyForecasts.length; i++) {
@@ -210,15 +256,26 @@ function initPage() {
                         forecastDiv.innerHTML = "";
                         
                         const forecastDate = new Date(forecast.dt * 1000);
-                        const forecastDay = forecastDate.getDate();
-                        const forecastMonth = forecastDate.getMonth() + 1;
-                        const forecastYear = forecastDate.getFullYear();
+                        const forecastDay = forecastDate.toLocaleDateString([], {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short"
+                        });
+                        const forecastTime = forecastDate.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        });
                         
                         // Date element
                         const forecastDateEl = document.createElement("p");
                         forecastDateEl.setAttribute("class", "forecast-date");
-                        forecastDateEl.innerHTML = `${forecastMonth}/${forecastDay}/${forecastYear}`;
+                        forecastDateEl.innerHTML = `${forecastDay}`;
                         forecastDiv.appendChild(forecastDateEl);
+
+                        const forecastTimeEl = document.createElement("p");
+                        forecastTimeEl.className = "forecast-time";
+                        forecastTimeEl.innerHTML = forecastTime;
+                        forecastDiv.appendChild(forecastTimeEl);
                         
                         // Icon element
                         const forecastIcon = forecast.weather[0]?.icon;
@@ -230,33 +287,32 @@ function initPage() {
                         // Description
                         const forecastDescEl = document.createElement("p");
                         forecastDescEl.innerHTML = forecast.weather[0]?.description || "";
-                        forecastDescEl.style.fontSize = "0.8rem";
+                        forecastDescEl.style.fontSize = "0.85rem";
                         forecastDescEl.style.textTransform = "capitalize";
                         forecastDiv.appendChild(forecastDescEl);
                         
                         // Temperature
                         const forecastTempEl = document.createElement("p");
-                        const tempF = Math.floor(forecast.main.temp);
                         const tempC = Math.floor((forecast.main.temp - 32) * 5/9);
-                        forecastTempEl.innerHTML = `🌡️ ${tempF}°F / ${tempC}°C`;
+                        forecastTempEl.innerHTML = `${tempC}°C`;
                         forecastDiv.appendChild(forecastTempEl);
                         
                         // Feels like
                         const forecastFeelsLike = document.createElement("p");
-                        const feelsLike = Math.floor(forecast.main.feels_like);
-                        forecastFeelsLike.innerHTML = `Feels: ${feelsLike}°F`;
+                        const feelsLikeC = Math.floor((forecast.main.feels_like - 32) * 5 / 9);
+                        forecastFeelsLike.innerHTML = `Feels ${feelsLikeC}°C`;
                         forecastFeelsLike.style.fontSize = "0.8rem";
                         forecastDiv.appendChild(forecastFeelsLike);
                         
                         // Humidity
                         const forecastHumidityEl = document.createElement("p");
-                        forecastHumidityEl.innerHTML = `💧 ${forecast.main.humidity}%`;
+                        forecastHumidityEl.innerHTML = `Humidity ${forecast.main.humidity}%`;
                         forecastDiv.appendChild(forecastHumidityEl);
                         
                         // Wind
                         const forecastWindEl = document.createElement("p");
-                        const windSpeed = (forecast.wind.speed * 2.237).toFixed(1);
-                        forecastWindEl.innerHTML = `💨 ${windSpeed} MPH`;
+                        const windSpeed = (forecast.wind.speed * 3.6).toFixed(1);
+                        forecastWindEl.innerHTML = `Wind ${windSpeed} km/h`;
                         forecastWindEl.style.fontSize = "0.8rem";
                         forecastDiv.appendChild(forecastWindEl);
                     }
@@ -321,17 +377,6 @@ function initPage() {
             historyItem.setAttribute("type", "button");
             historyItem.setAttribute("class", "history-item");
             historyItem.innerHTML = `<i class="fas fa-history"></i> ${searchHistory[i]}`;
-            historyItem.style.cssText = `
-                width: 100%;
-                padding: 10px;
-                margin: 5px 0;
-                background: #f7fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: left;
-                transition: all 0.3s;
-            `;
             historyItem.addEventListener("click", function () {
                 cityEl.value = searchHistory[i];
                 getWeather(searchHistory[i]);

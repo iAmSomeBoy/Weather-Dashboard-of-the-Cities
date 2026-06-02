@@ -5,109 +5,138 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Weather Dashboard | Complete Weather App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="site-header">
-        <h1><i class="fas fa-cloud-sun"></i> Weather Dashboard</h1>
-    </header>
-
-    <div class="layout">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <h5 class="sidebar-label">Search for a City</h5>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand-chip">
+                <i class="fas fa-cloud"></i>
+                <span>weather</span>
+            </div>
             <div class="search-group">
-                <input id="enter-city" type="text" class="search-input" placeholder="Enter city name (e.g., London, Dhaka)">
-                <button class="search-btn" type="button" id="search-button">
-                    <i class="fas fa-search"></i>
+                <i class="fas fa-search search-icon"></i>
+                <input id="enter-city" type="text" class="search-input" placeholder="Search city...">
+                <button class="search-btn" type="button" id="search-button" aria-label="Search city">
+                    <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
-            <button class="clear-btn" type="button" id="clear-history">
-                <i class="fas fa-trash-alt"></i> Clear History
+            <button class="icon-btn" type="button" id="clear-history" title="Clear history">
+                <i class="fas fa-trash-alt"></i>
             </button>
-            <div id="history" class="history-list"></div>
-        </aside>
+            <button class="icon-btn icon-btn-soft" type="button" title="Settings">
+                <i class="fas fa-gear"></i>
+            </button>
+            <button class="icon-btn icon-btn-soft" type="button" title="Theme">
+                <i class="fas fa-sun"></i>
+            </button>
+            <a class="support-btn" href="https://github.com/" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+                Support Project
+            </a>
+        </header>
 
-        <!-- Main content -->
+        <div id="history" class="history-list"></div>
+
         <main class="main-content">
-            <!-- Today's weather card -->
-            <div class="today-card hidden" id="today-weather">
-                <div class="weather-header">
-                    <h2 id="city-name" class="city-name"></h2>
-                    <div class="weather-icon-container">
+            <section class="section-block">
+                <h2 class="section-title">Today Overview</h2>
+                <div class="today-layout hidden" id="today-weather">
+                    <article class="today-main-card">
                         <img id="current-pic" alt="Weather icon" class="weather-icon">
+                        <p id="temperature" class="hero-temp"></p>
                         <span id="weather-description" class="weather-desc"></span>
-                    </div>
-                </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <i class="fas fa-thermometer-half"></i>
-                        <p id="temperature" class="stat"></p>
-                        <span class="stat-label">Temperature</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-temperature-low"></i>
-                        <p id="feels-like" class="stat"></p>
-                        <span class="stat-label">Feels Like</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-tint"></i>
-                        <p id="humidity" class="stat"></p>
-                        <span class="stat-label">Humidity</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-wind"></i>
-                        <p id="wind-speed" class="stat"></p>
-                        <span class="stat-label">Wind Speed</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-compass"></i>
-                        <p id="wind-direction" class="stat"></p>
-                        <span class="stat-label">Wind Direction</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-eye"></i>
-                        <p id="visibility" class="stat"></p>
-                        <span class="stat-label">Visibility</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-arrow-down"></i>
-                        <p id="pressure" class="stat"></p>
-                        <span class="stat-label">Pressure</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-water"></i>
-                        <p id="dew-point" class="stat"></p>
-                        <span class="stat-label">Dew Point</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-sun"></i>
-                        <p id="UV-index" class="stat"></p>
-                        <span class="stat-label">UV Index</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-cloud-rain"></i>
-                        <p id="cloudiness" class="stat"></p>
-                        <span class="stat-label">Cloudiness</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-sunrise"></i>
-                        <p id="sunrise" class="stat"></p>
-                        <span class="stat-label">Sunrise</span>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-sunset"></i>
-                        <p id="sunset" class="stat"></p>
-                        <span class="stat-label">Sunset</span>
-                    </div>
-                </div>
-            </div>
+                        <div class="today-meta">
+                            <p id="city-name" class="city-name"></p>
+                            <p>
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="current-date"></span>
+                            </p>
+                            <p>
+                                <i class="fas fa-sun"></i>
+                                <span id="sunrise-meta"></span>
+                                <span class="meta-separator">/</span>
+                                <i class="fas fa-moon"></i>
+                                <span id="sunset-meta"></span>
+                            </p>
+                        </div>
+                    </article>
 
-            <!-- 5-day forecast -->
-            <div id="fiveday-header" class="forecast-section hidden">
-                <h3 class="forecast-title"><i class="fas fa-calendar-week"></i> 5-Day Forecast</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-wind"></i>
+                            <span class="stat-label">Wind Speed</span>
+                            <p id="wind-speed" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-tint"></i>
+                            <span class="stat-label">Humidity</span>
+                            <p id="humidity" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-eye"></i>
+                            <span class="stat-label">Visibility</span>
+                            <p id="visibility" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-compass"></i>
+                            <span class="stat-label">Wind Direction</span>
+                            <p id="wind-direction" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-arrow-down"></i>
+                            <span class="stat-label">Pressure</span>
+                            <p id="pressure" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-sunrise"></i>
+                            <span class="stat-label">Sunrise</span>
+                            <p id="sunrise" class="stat"></p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-sunset"></i>
+                            <span class="stat-label">Sunset</span>
+                            <p id="sunset" class="stat"></p>
+                        </div>
+
+                        <div class="stat-card extra-stat">
+                            <i class="fas fa-temperature-low"></i>
+                            <span class="stat-label">Feels Like</span>
+                            <p id="feels-like" class="stat"></p>
+                        </div>
+                        <div class="stat-card extra-stat">
+                            <i class="fas fa-water"></i>
+                            <span class="stat-label">Dew Point</span>
+                            <p id="dew-point" class="stat"></p>
+                        </div>
+                        <div class="stat-card extra-stat">
+                            <i class="fas fa-sun"></i>
+                            <span class="stat-label">UV Index</span>
+                            <p id="UV-index" class="stat"></p>
+                        </div>
+                        <div class="stat-card extra-stat">
+                            <i class="fas fa-cloud-rain"></i>
+                            <span class="stat-label">Cloudiness</span>
+                            <p id="cloudiness" class="stat"></p>
+                        </div>
+                    </div>
+
+                    <aside class="hourly-preview">
+                        <h3>Upcoming Hours</h3>
+                        <div id="hourly-preview-body">
+                            <div class="hourly-item">No forecast yet</div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+
+            <section id="fiveday-header" class="forecast-section hidden">
+                <h3 class="section-title">Next 5 Days</h3>
+                <div id="forecast-tabs" class="forecast-tabs"></div>
                 <div class="forecast-grid" id="forecast-container">
                     <div class="forecast"></div>
                     <div class="forecast"></div>
@@ -115,16 +144,14 @@
                     <div class="forecast"></div>
                     <div class="forecast"></div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Loading indicator -->
             <div id="loading" class="loading hidden">
                 <i class="fas fa-spinner fa-spin"></i> Loading weather data...
             </div>
 
-            <!-- Error message -->
             <div id="error-message" class="error-message hidden">
-                <i class="fas fa-exclamation-triangle"></i> 
+                <i class="fas fa-exclamation-triangle"></i>
                 <span id="error-text"></span>
             </div>
         </main>
